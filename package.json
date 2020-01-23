@@ -1,14 +1,16 @@
 {
   "name": "speedtest",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Gustaf Ridderstolpe",
+  "repository": {"url": "https://github.com/obrut/speedtest"},
+  "license": "MIT",
   "dependencies": {
-    "mqtt": "^3.0.0"
+    "mqtt": "^3.0.0",
+    "node-cron": "^2.0.3"
   }
 }

@@ -1,6 +1,7 @@
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 const mqtt = require('mqtt');
+const cron = require('node-cron');
 
 async function runTest() {
 	const {stdout, stderr} = await exec('speedtest-cli --json');
@@ -9,16 +10,19 @@ async function runTest() {
 }
 
 function sendMQTT(ping, download, upload) {
-	var client  = mqtt.connect('mqtt://192.168.1.72')
+	const noTopic = 'speedtest';
+	const client  = mqtt.connect(process.env.MQTTServer)
 	client.on('connect', function () {
-		client.subscribe('broadband', function (err) {
+		client.subscribe(process.env.MQTTTopic || noTopic, function (err) {
 			if (!err) {
-				client.publish('broadband/download', download.toString());
-				client.publish('broadband/upload', upload.toString());
-				client.publish('broadband/ping', ping.toString());
+				client.publish(`${process.env.MQTTTopic || noTopic}/download`, download.toString());
+				client.publish(`${process.env.MQTTTopic || noTopic}/upload`, upload.toString());
+				client.publish(`${process.env.MQTTTopic || noTopic}/ping`, ping.toString());
 			}
 		})
 	})
 }
 
-return runTest().then(d =>  { sendMQTT(d.ping, d.download, d.upload) });
+cron.schedule(process.env.CronSchedule, () => {
+	return runTest().then(d =>  { sendMQTT(d.ping, d.download, d.upload) });
+})
