@@ -9,10 +9,7 @@ async function runTest() {
 }
 
 function sendMQTT(ping, download, upload) {
-	console.log(ping, download, upload);
-
 	var client  = mqtt.connect('mqtt://192.168.1.72')
- 
 	client.on('connect', function () {
 		client.subscribe('broadband', function (err) {
 			if (!err) {
