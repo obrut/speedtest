@@ -2,6 +2,9 @@ const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 const mqtt = require('mqtt');
 const cron = require('node-cron');
+const schedule = process.env.CronSchedule || '* 15 * * *';
+const mqttServer = process.env.MQTTServer || 'mqtt://test.mosquitto.org';
+const topic = process.env.MQTTTopic || 'speedtest';
 
 async function runTest() {
 	const {stdout, stderr} = await exec('speedtest-cli --json');
@@ -10,19 +13,21 @@ async function runTest() {
 }
 
 function sendMQTT(ping, download, upload) {
-	const noTopic = 'speedtest';
-	const client  = mqtt.connect(process.env.MQTTServer)
+	const client  = mqtt.connect(mqttServer)
 	client.on('connect', function () {
-		client.subscribe(process.env.MQTTTopic || noTopic, function (err) {
+		client.subscribe(topic, function (err) {
 			if (!err) {
-				client.publish(`${process.env.MQTTTopic || noTopic}/download`, download.toString());
-				client.publish(`${process.env.MQTTTopic || noTopic}/upload`, upload.toString());
-				client.publish(`${process.env.MQTTTopic || noTopic}/ping`, ping.toString());
+				console.log(`Sending messages to ${mqttServer} on topic ${topic}/+.`);
+				client.publish(`${topic}/download`, download.toString());
+				client.publish(`${topic}/upload`, upload.toString());
+				client.publish(`${topic}/ping`, ping.toString());
 			}
 		})
 	})
 }
 
-cron.schedule(process.env.CronSchedule, () => {
-	return runTest().then(d =>  { sendMQTT(d.ping, d.download, d.upload) });
+cron.schedule(schedule, async () => {
+	console.log(`Running according to schedule [${schedule}].`);
+	const d = await runTest();
+	sendMQTT(d.ping, d.download, d.upload);
 })
