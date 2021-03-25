@@ -13,7 +13,7 @@
   "license": "MIT",
   "dependencies": {
     "console-stamp": "^0.2.9",
-    "mqtt": "^3.0.0",
-    "node-cron": "^2.0.3"
+    "mqtt": "^4.2.6",
+    "node-cron": "^3.0.0"
   }
 }
