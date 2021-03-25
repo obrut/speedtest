@@ -5,8 +5,6 @@ console.log('Application started.');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 const mqtt = require('mqtt');
-const cron = require('node-cron');
-const schedule = process.env.CronSchedule || '* 15 * * *';
 const mqttServer = process.env.MQTTServer || 'mqtt://test.mosquitto.org';
 const topic = process.env.MQTTTopic || 'speedtest';
 
@@ -35,8 +33,6 @@ function sendMQTT(ping, download, upload, o) {
 	})
 }
 
-cron.schedule(schedule, async () => {
-	console.log(`Running according to schedule [${schedule}].`);
-	const d = await runTest();
-	sendMQTT(d.ping, d.download, d.upload, d);
-})
+console.log(`Running test.`);
+const d = await runTest();
+sendMQTT(d.ping, d.download, d.upload, d);
