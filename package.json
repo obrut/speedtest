@@ -1,6 +1,6 @@
 {
   "name": "speedtest",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -13,6 +13,8 @@
   "license": "MIT",
   "dependencies": {
     "console-stamp": "^0.2.9",
-    "mqtt": "^4.2.6"
- }
+    "minimist": "^1.2.5",
+    "mqtt": "^4.2.6",
+    "node-cron": "^3.0.0"
+  }
 }
