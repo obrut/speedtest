@@ -10,7 +10,7 @@ const mqtt = require('mqtt');
 const mqttServer = process.env.MQTTServer || argv['MQTTServer'] || 'mqtt://test.mosquitto.org';
 const topic = process.env.MQTTTopic || argv['MQTTTopic'] || 'speedtest';
 const cron = require('node-cron');
-const schedule = process.env.CronSchedule || argv['CronSchedule'] || '* 15 * * *';
+const schedule = process.env.CronSchedule.toString() || argv['CronSchedule'] || '* 15 * * *';
 
 async function runTest() {
 	const {stdout, stderr} = await exec('speedtest-cli --json');
