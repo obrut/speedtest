@@ -3,7 +3,7 @@ require('console-stamp')(console, '[HH:MM:ss.l]');
 console.log('Application started.');
 
 var argv = require('minimist')(process.argv);
-console.log(argv);
+
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 const mqtt = require('mqtt');
@@ -11,8 +11,6 @@ const mqttServer = process.env.MQTTServer || argv['MQTTServer'] || 'mqtt://test.
 const topic = process.env.MQTTTopic || argv['MQTTTopic'] || 'speedtest';
 const cron = require('node-cron');
 const schedule = process.env.CronSchedule || argv['CronSchedule'] || '* 15 * * *';
-
-console.log(`Schedule: ${schedule}`)
 
 async function runTest() {
 	const {stdout, stderr} = await exec('speedtest-cli --json');
