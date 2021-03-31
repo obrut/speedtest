@@ -10,7 +10,7 @@ const mqtt = require('mqtt');
 const mqttServer = process.env.MQTTServer || argv['MQTTServer'] || 'mqtt://test.mosquitto.org';
 const topic = process.env.MQTTTopic || argv['MQTTTopic'] || 'speedtest';
 const cron = require('node-cron');
-const schedule = process.env.CronSchedule.toString() || argv['CronSchedule'] || '* 15 * * *';
+const schedule = process.env.CronSchedule || argv['CronSchedule'] || '* 15 * * *';
 
 async function runTest() {
 	const {stdout, stderr} = await exec('speedtest-cli --json');
@@ -37,8 +37,23 @@ function sendMQTT(ping, download, upload, o) {
 	})
 }
 
-cron.schedule(schedule, async () => {
-	console.log(`Running according to schedule [${schedule}].`);
-	const d = await runTest();
-	sendMQTT(d.ping, d.download, d.upload, d);
-})
+function validate() {
+	console.log('Validating only');
+	const isValid = cron.validate(schedule.toString());
+	console.log(`Schedule: ${schedule}`, `\nValid: ${isValid}`);
+	return isValid;
+}
+
+function runJob() {
+	cron.schedule(schedule.toString(), async () => {
+		console.log(`Running according to schedule [${schedule}].`);
+		const d = await runTest();
+		sendMQTT(d.ping, d.download, d.upload, d);
+	})
+}
+
+if (argv['validate']) {
+	return validate();
+} else {
+	runJob();
+}
