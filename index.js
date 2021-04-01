@@ -4,12 +4,13 @@ console.log('Application started.');
 
 var argv = require('minimist')(process.argv);
 
+const validate = process.env.validate || argv['validate'] || false;
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 const mqtt = require('mqtt');
 const mqttServer = process.env.MQTTServer || argv['MQTTServer'] || 'mqtt://test.mosquitto.org';
 const topic = process.env.MQTTTopic || argv['MQTTTopic'] || 'speedtest';
-const cron = require('node-cron');
+var CronJob = require('cron').CronJob;
 const schedule = process.env.CronSchedule || argv['CronSchedule'] || '* 15 * * *';
 
 async function runTest() {
@@ -37,23 +38,13 @@ function sendMQTT(ping, download, upload, o) {
 	})
 }
 
-function validate() {
-	console.log('Validating only');
-	const isValid = cron.validate(schedule.toString());
-	console.log(`Schedule: ${schedule}`, `\nValid: ${isValid}`);
-	return isValid;
-}
-
 function runJob() {
-	cron.schedule(schedule.toString(), async () => {
+	const job = new CronJob(schedule, async () => {
 		console.log(`Running according to schedule [${schedule}].`);
 		const d = await runTest();
 		sendMQTT(d.ping, d.download, d.upload, d);
-	})
+	}, null, true, 'Europe/Stockholm');
+	job.start();
 }
 
-if (argv['validate']) {
-	return validate();
-} else {
-	runJob();
-}
+runJob();
